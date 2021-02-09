@@ -4,6 +4,10 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <Platform>AnyCPU</Platform>
+    <!-- ILProj cannot generate/consume $(OutDir)\ref\$(TargetFramework) -->
+    <!-- the compiler should not generate a reference assembly -->
+    <!-- see also https://claires.site/2018/07/03/create-and-pack-reference-assemblies/ -->
+    <!-- see also https://github.com/NuGet/Home/issues/4184 -->
     <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
 
     <!-- ilasm/ilproj specific props -->
