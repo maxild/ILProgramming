@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.IL">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+    <MicrosoftNetCoreIlasmPackageVersion>5.0.0</MicrosoftNetCoreIlasmPackageVersion>
+    <!-- <IncludePath Condition=" '$(TargetFramework)' == 'netstandard2.0' ">..\include\netstandard</IncludePath> -->
+    <!-- <IlasmFlags>$(IlasmFlags) -INCLUDE=$(IncludePath)</IlasmFlags> -->
+    <IlasmFlags>$(IlasmFlags)</IlasmFlags>
+    <!-- explicitly include compile items -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+
+  <!-- TODO: Is it necessesary to include IL source -->
+  <ItemGroup>
+    <!-- Main has to be the first file. Do not put anything before Main.il -->
+    <!-- <Compile Include="Main.il" /> -->
+
+    <Compile Include="Class3.il" />
+  </ItemGroup>
+
+</Project>

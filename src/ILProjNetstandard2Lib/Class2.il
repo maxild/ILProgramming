@@ -38,16 +38,15 @@
   .ver 2:0:0:0
 }
 
-.assembly ILProjNetstandard2
+.assembly ILProjNetstandard2Lib
 {
   .ver 1:0:0:0
 }
 
-.module ILProjNetstandard2.dll
+.module ILProjNetstandard2Lib.dll
 
-.namespace ILProjNetstandard2 {
-  .class public auto ansi Class2
-    extends [CORE_ASSEMBLY]System.Object
+.namespace ILProjNetstandard2Lib {
+  .class public auto ansi Class2 extends [CORE_ASSEMBLY]System.Object
   {
     .method public hidebysig static int32 SayHello(int32) cil managed
     {

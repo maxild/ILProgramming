@@ -1,6 +1,6 @@
-﻿using ILProjNetstandard2;
+﻿using ILProjNetstandard2Lib;
 
-namespace CSProjNet5
+namespace CSProjNet5App
 {
     public static class Program
     {
