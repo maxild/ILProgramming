@@ -6,9 +6,10 @@
 # This works (consuming the library using csproj)
 dotnet run --project src/CSProjNet5App/CSProjNet5App.csproj
 
-# This doesn't work (building net5.0 library using ilproj)
+# This works (building net5.0 library using ilproj)
+# NOTE: <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
 #dotnet build src/ILProjNet5Lib/ILProjNet5Lib.ilproj
 
-# This doesn't work either (building net5.0 console app using standalone ilproj)
-#dotnet build src/ILProjNet5App/ILProjNet5App.ilproj
-#dotnet run --project src/ILProjNet5App/ILProjNet5App.ilproj
+# This works (building net5.0 console app using standalone ilproj)
+# NOTE: <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+dotnet run --project src/ILProjNet5App/ILProjNet5App.ilproj

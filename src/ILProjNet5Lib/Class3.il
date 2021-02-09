@@ -16,17 +16,17 @@
 
 .module ILProjNet5Lib.dll
 
-.class public auto ansi ILProjNet5Lib.Class3
+// .class public auto ansi ILProjNet5Lib.Class3
+//   extends [CORE_ASSEMBLY]System.Object
+.class public abstract auto ansi sealed beforefieldinit ILProjNet5Lib.Class3
   extends [CORE_ASSEMBLY]System.Object
 {
-  .method public hidebysig static int32 SayHello(int32) cil managed
+  .method public hidebysig static int32 Square(int32 a) cil managed
   {
-    .maxstack 4
-
-    ldstr "Hello World!"
-    call void [CORE_ASSEMBLY]System.Console::WriteLine(string)
-
+    .maxstack 2
     ldarg.0
+    dup
+    mul
     ret
   }
 }

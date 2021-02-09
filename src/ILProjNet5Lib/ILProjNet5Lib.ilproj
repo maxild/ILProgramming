@@ -3,10 +3,15 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <Platform>AnyCPU</Platform>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+
+    <!-- ilasm/ilproj specific props -->
     <MicrosoftNetCoreIlasmPackageVersion>5.0.0</MicrosoftNetCoreIlasmPackageVersion>
     <!-- <IncludePath Condition=" '$(TargetFramework)' == 'netstandard2.0' ">..\include\netstandard</IncludePath> -->
     <!-- <IlasmFlags>$(IlasmFlags) -INCLUDE=$(IncludePath)</IlasmFlags> -->
     <IlasmFlags>$(IlasmFlags)</IlasmFlags>
+
     <!-- explicitly include compile items -->
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
