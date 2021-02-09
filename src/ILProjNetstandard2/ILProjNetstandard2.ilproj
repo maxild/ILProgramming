@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk.IL">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <MicrosoftNetCoreIlasmPackageVersion>5.0.0</MicrosoftNetCoreIlasmPackageVersion>
+    <!-- <IncludePath Condition=" '$(TargetFramework)' == 'netstandard2.0' ">..\include\netstandard</IncludePath> -->
+    <!-- <IlasmFlags>$(IlasmFlags) -INCLUDE=$(IncludePath)</IlasmFlags> -->
+    <IlasmFlags>$(IlasmFlags)</IlasmFlags>
+    <!-- this is true by default -->
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <CoreAssembly>System.Runtime</CoreAssembly>
+    <CoreAssembly Condition=" '$(TargetFramework)' == 'netstandard2.0' ">netstandard</CoreAssembly>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- mscorlib is passed in as an explicit reference from C# targets but not via the IL SDK. -->
+    <Reference Include="$(CoreAssembly)" Condition="!$(TargetFramework.StartsWith('netstandard'))" />
+  </ItemGroup>
+
+  <!-- TODO: Is it necessesary to include IL source -->
+  <ItemGroup>
+    <!-- Main has to be the first file. Do not put anything before Main.il -->
+    <!-- <Compile Include="Main.il" /> -->
+
+    <!-- <Compile Include="Class1.il" /> -->
+    <Compile Include="Class2.il" />
+  </ItemGroup>
+
+</Project>

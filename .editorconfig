@@ -1,0 +1,42 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
+root = true
+
+# Don't use tabs for indentation.
+[*]
+indent_style = space
+charset = utf-8
+# (Please don't specify an indent_size here; that has too many unintended consequences.)
+
+# Code files
+[*.{cs,csx}]
+indent_size = 4
+insert_final_newline = true
+# visual studio seems to have issues with utf-8
+charset = utf-8-bom
+
+# XML project files
+[*.{csproj,ilproj,proj}]
+indent_size = 2
+
+# XML config files
+[*.{props,targets,config,nuspec}]
+indent_size = 2
+
+# JSON files
+[*.json]
+indent_size = 2
+
+# Powershell files
+[*.ps1]
+indent_size = 2
+
+# Shell script files
+[*.sh]
+end_of_line = lf
+indent_size = 2
+
+# YAML looks best with 2 spaces
+[*.{yml,yaml}]
+indent_size = 2
