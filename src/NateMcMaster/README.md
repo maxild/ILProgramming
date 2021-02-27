@@ -2,7 +2,7 @@ Credits go to https://natemcmaster.com/blog/2017/12/21/netcore-primitives/
 
 ## .NET commandline compiling (without MSBuild SDK)
 
-NOTE: This can also be done using ilasm (IL), and probably also the F# compiler
+> NOTE: This can also be done using ilasm (IL), and probably also the F# compiler
 can be used this way (haven't tried it for F# yet)
 
 The C# compiler (Roslyn) in the .NET 5 SDK can be invoked like
@@ -84,7 +84,7 @@ To resolve this, create a file named `Program.runtimeconfig.json` with this cont
 
 These options instruct dotnet to use the Microsoft.NETCore.App 5.0.0 shared framework. Even though I only have 5.0.3 installed on my machine the so-called rolled forward policy will just use this latest versiion of the 5.x.y shared framework (aka runtime).
 
-> `Framework-dependent apps` use the target framework version with a ".0" patch version (for the `runtimeOptions.framework.version` value), and `Self-contained apps` use the latest corresponding patch version (from when the SDK shipped).
+> NOTE: `Framework-dependent apps` use the target framework version with a ".0" patch version (for the `runtimeOptions.framework.version` value), and `Self-contained apps` use the latest corresponding patch version (from when the SDK shipped).
 
 > NOTE: The `runtimeconfig.json` file will also configure the .NET host to probe for `System.*` (BCL) assemblies in the shared framework folder at runtime. The (runtime) assemblies are then loaded from `/usr/share/dotnet/shared/Microsoft.NETCore.App/5.0.3/` on my Linux machine.
 
