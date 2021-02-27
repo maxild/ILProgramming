@@ -15,6 +15,9 @@ artifacts/
 *.user
 *.sln.docstates
 
+# By convention ildasm outputs this extension
+*.ildasm.il
+
 # Build results
 [Dd]ebug/
 [Rr]elease/
