@@ -45,15 +45,15 @@ $ dotnet /usr/share/dotnet/sdk/5.0.103/Roslyn/bincore/csc.dll \
 
 > NOTE: `System.Runtime` is the core assembly (aka corelib) library in the the `net5.0` target pack, and `System.Console` is another BCL library from `dotnet/runtime`. The corelib can be defined as the only library without a reference to any other managed library (where System.Object` is defined).
 
-> NOTE: The `.dll` extension is a .NET Core convention, not a requirement. If not specified, the compiler will produce a file named `Program.exe`. On Windows, this would be a little misleading because you can’t double-click Program.exe, so in .NET Core we always use `.dll`. On Linux this is just weird, because (native) dynamic libraries normally have an `.so` extension, but .NET uses both PE file format (by specification, and not the Linux ELF file format) and a windows inspired extension (by convention), so we just accept that and move on. The convention totally makes sense, because a managed executable like `csc.dll` does need not a host to run, because everything in .NET user code is a DLL.
+> NOTE: The `.dll` extension is a .NET Core convention, not a requirement. If not specified, the compiler will produce a file named `Program.exe`. On Windows, this would be a little misleading because you can’t double-click Program.exe, so in .NET Core we always use `.dll`. On Linux this is just weird, because (native) dynamic libraries normally have an `.so` extension, but .NET uses both PE file format (by specification, and not the Linux ELF file format) and a windows inspired extension (by convention), so we just accept that and move on. The convention totally makes sense, because a managed executable like `csc.dll` does need a host to run, because everything in .NET (user) code is a DLL.
 
-> NOTE: The referenced assemblies are from the target packs of the `Microsoft.NETCore.App` shared framework. This used to by a metapackage distributed via NuGet. But in modern .NET Core it turned out that this kind of turned into "package hell" for users to explicitly reference the package graph in msbuild files, so now the shared framework is part of the SDK.
+> NOTE: The referenced assemblies are from the target packs of the `Microsoft.NETCore.App` shared framework. This used to by a metapackage distributed via NuGet. But it was dicovered around 3.0 that this was to much "package config" for users of the framework, because thay had to use explicit references to too many packageas of the package graph, so now the shared framework is part of the SDK, and you sort of reference everything by default (The graph is trimmed at publish-time, I guess!!!).
 
 > NOTE: Starting .NET Core 3.0, the reference assemblies are no longer part of the NuGetFallbackFolder. Instead, they ship in a "reference pack". On Linux, those .dlls are now found in `/usr/share/dotnet/packs/Microsoft.NETCore.App.Ref/5.0.0/ref/net5.0/` for `net5.0` (or `/usr/share/dotnet/packs/Microsoft.NETCore.App.Ref/3.1.0/ref/netcoreapp3.1/` for `netcoreapp3.1`)
 
 ## Runtime and Shared Framework (same thing these days)
 
-If we try to run the `Program.dll` managed assembly (portable executable) via the `dotnet` host we get and error
+If we try to run the `Program.dll` managed assembly (portable executable) via the `dotnet` host we get the following error
 
 ```bash
 $ dotnet Program.dll
@@ -64,11 +64,11 @@ Failed to run as a self-contained app.
   - If this should be a framework-dependent app, add the '/home/maxfire/repos/github.com/maxild/ILProgramming/src/NateMcMaster/Program.runtimeconfig.json' file and specify the appropriate framework.
 ```
 
-The .NET Core host cannot find a required `Program.runtimeconfig.json` file. All framework=dependent applications need this file. This JSON file configures options for the runtime.
+The .NET Core host cannot find a required `Program.runtimeconfig.json` file. All framework-dependent apps need this file. This JSON file configures options for the runtime, and also define which runtime to load to service your app with jit, gc etc.
 
 >  The library 'libhostpolicy.so' required to execute the application was not found along side the managed executable.
 
-To resolve this, create a file named Program.runtimeconfig.json with these contents:
+To resolve this, create a file named `Program.runtimeconfig.json` with this content
 
 ```json
 {
@@ -83,6 +83,8 @@ To resolve this, create a file named Program.runtimeconfig.json with these conte
 ```
 
 These options instruct dotnet to use the Microsoft.NETCore.App 5.0.0 shared framework. Even though I only have 5.0.3 installed on my machine the so-called rolled forward policy will just use this latest versiion of the 5.x.y shared framework (aka runtime).
+
+> `Framework-dependent apps` use the target framework version with a ".0" patch version (for the `runtimeOptions.framework.version` value), and `Self-contained apps` use the latest corresponding patch version (from when the SDK shipped).
 
 > NOTE: The `runtimeconfig.json` file will also configure the .NET host to probe for `System.*` (BCL) assemblies in the shared framework folder at runtime. The (runtime) assemblies are then loaded from `/usr/share/dotnet/shared/Microsoft.NETCore.App/5.0.3/` on my Linux machine.
 
@@ -118,4 +120,4 @@ https://github.com/dotnet/sdk/blob/217ba8dc050abf795d82c8e2eb424ff2f81b6577/src/
 
 The `global.json` file is used to determine the version of the SDK that is used. It is mean to be committed into source code, but not published with your application when you deployed it. `runtimeconfig.json`, on the other hand, is meant to be part of the application, and you must deploy it with your app.
 
-The .NET Core SDK can be used to build multiple versions of .NET Core applications. For example, with the latest .NET Core SDK (version 5.0.103) you could build a `netcoreapp3.1` or `net5.0` project. If you use the default SDK values, these projects would generated a `runtimeconfig.json` files with `runtimeOptions.framework.version` set to 3.1.0(?haven't tested?) or 5.0.0, respectively (Framework-dependent apps use the target framework version with a ".0" patch version, Self-contained apps use the latest corresponding patch version (from when the SDK shipped)). Note that Framework-dependent apps can be more lax, and get automatic runtime patches.
+The .NET Core SDK can be used to build multiple versions of .NET Core applications. For example, with the latest .NET Core SDK (version 5.0.103) you could build a `netcoreapp3.1` or `net5.0` project. If you use the default SDK values, these projects would generated a `runtimeconfig.json` files with `runtimeOptions.framework.version` set to 3.1.0(?haven't tested?) or 5.0.0, respectively.
