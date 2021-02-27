@@ -1,3 +1,5 @@
+Credits go to https://natemcmaster.com/blog/2017/12/21/netcore-primitives/
+
 The C# compiler in the .NET 5 SDK can be invoked like
 
 ```bash
