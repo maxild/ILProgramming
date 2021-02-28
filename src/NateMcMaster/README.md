@@ -14,7 +14,7 @@ $ dotnet /usr/share/dotnet/sdk/5.0.103/Roslyn/bincore/csc.dll -version
 
 > NOTE: At the moment the latest sdk version is 5.0.103 (patch 3 of the 100 feature band used by visual studio 16.8.x). Every patch is an in-place update to the sdk, so a future 5.0.104 will overwtite the 5.0.103. But the coming 5.0.200 sdk, used by vs2019 16.9, will install side-by-side the latest 5.0.1nn version.
 
-> NOTE: The version of Roslyn can also be computed by writing `#version` in a c# file
+> NOTE: The version of Roslyn can also be computed by writing `#error version` in a c# file
 
 ```csharp
 class Program
