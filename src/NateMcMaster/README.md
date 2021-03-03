@@ -85,6 +85,73 @@ To resolve this, create a file named `Program.runtimeconfig.json` with this cont
 }
 ```
 
+**The shared framework version represents the minimum version. The .NET Core host will never run on a lower version, but it may try to run on a higher one.**
+
+> NOTE: The `.runtimeconfig.json` can be used to control settings which are not surfaced in Visual Studio, such as automatically running your app on higher .NET Core versions, tuning thread pools and garbage collection, and more.
+
+.NET Core shared frameworks support installing side-by-side versions, and therefore, dotnet has to pick one version when starting an application. The following options are used to set which shared frameworks and which versions of those frameworks are loaded.
+
+```json
+{
+  "runtimeOptions": {
+    "rollForward": "Major"
+  }
+}
+```
+
+The Spec can be found [here](https://github.com/dotnet/designs/blob/main/accepted/2019/runtime-binding.md)
+
+**RollForward**
+RollForward specifies the roll-forward policy for an application, either as a fallback to accommodate missing a specific runtime version or as a directive to use a later version.
+
+RollForward can have the following values:
+
+- `LatestPatch` -- Roll forward to the highest patch version. This disables minor version roll forward.
+- `Minor` -- Roll forward to the lowest higher minor version, if requested minor version is missing. If the requested minor version is present, then the LatestPatch policy is used. **This is the default**
+- `Major` -- Roll forward to lowest higher major version, and lowest minor version, if requested major version is missing. If the requested major version is present, then the Minor policy is used.
+- `LatestMinor` -- Roll forward to highest minor version, even if requested minor version is present.
+- `LatestMajor` -- Roll forward to highest major and highest minor version, even if requested major is present.
+- `Disable` -- Do not roll forward. Only bind to specified version. This policy is not recommended for general use since it disable the ability to roll-forward to the latest patches. It is only recommended for testing.
+
+RollForward can be set in the following ways:
+
+- Project file property: `RollForward`
+- Runtime configuration file property: `rollForward`
+- Environment variable: `DOTNET_ROLL_FORWARD`
+- Command line argument: `--roll-forward`
+
+
+By default, .NET Core will try to find the highest patch version of the shared framework which has the same major and minor version as your app specifies. But if it can’t find that, it may roll-forward to newer versions. This option controls the roll-forward policy.
+
+**Well-known runtime settings**
+
+| Setting name | Type | Description |
+| ------------ | ---- | ----------- |
+| System.GC.Server | boolean | Enable server garbage collection. |
+| System.GC.Concurrent | boolean | Enable concurrent garbage collection. |
+| System.GC.RetainVM | boolean | Put segments that should be deleted on a standby list for future use instead of releasing them back to the OS. |
+| System.Runtime.TieredCompilation | boolean | Enable tiered compilation. |
+| System.Threading.ThreadPool.MinThreads | integer | Override MinThreads for the ThreadPool worker pool. |
+| System.Threading.ThreadPool.MaxThreads | integer | Override MaxThreads for the ThreadPool worker pool. |
+| System.Globalization.Invariant | boolean | Enabling invariant mode disables globalization behavior. |
+
+These settings can also be configured in your .csproj file. The best way to find more is to look at the [Microsoft.NET.Sdk.targets](https://github.com/dotnet/sdk/blob/9c9b8b16d15ed6631a79998a9210e5fb1624ff94/src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.Sdk.targets#L388-L478) file itself.
+
+```xml
+<PropertyGroup>
+  <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+  <ServerGarbageCollection>true</ServerGarbageCollection>
+  <RetainVMGarbageCollection>true</RetainVMGarbageCollection>
+  <ThreadPoolMinThreads>1</ThreadPoolMinThreads>
+  <ThreadPoolMaxThreads>100</ThreadPoolMaxThreads>
+  <!-- Supported as of .NET Core SDK 3.0 Preview 1 -->
+  <TieredCompilation>true</TieredCompilation>
+  <InvariantGlobalization>true</InvariantGlobalization>
+</PropertyGroup>
+```
+
+> NOTE: The implementation of the shared framework lookup can be seen in the socalled muxer: https://github.com/dotnet/runtime/blob/main/src/native/corehost/fxr/fx_muxer.cpp
+
 These options instruct dotnet to use the Microsoft.NETCore.App 5.0.0 shared framework. Even though I only have 5.0.3 installed on my machine the so-called rolled forward policy will just use this latest versiion of the 5.x.y shared framework (aka runtime).
 
 > NOTE: Even though I have updated the SDK to 5.0.200, the included runtimes are still unchanged compared with SDK 5.0.103
@@ -93,9 +160,87 @@ These options instruct dotnet to use the Microsoft.NETCore.App 5.0.0 shared fram
 - ASP.NET Core Runtime 5.0.3 (`Microsoft.AspNetCore.App`)
 - .NET Desktop Runtime 5.0.3
 
+```bash
+# It will show the names, versions, and locations of shared frameworks.
+$ dotnet --list-runtimes.
+```
+
+There are the following shared frameworks.
+
+| Framework name | Description |
+| -------------- | ----------- |
+| Microsoft.NETCore.App | The base runtime. It supports things like System.Object, List<T>, string, memory management, file and network IO, threading, etc. |
+| Microsoft.AspNetCore.App | The default web runtime. It imports Microsoft.NETCore.App, and adds API to build an HTTP server using Kestrel, Mvc, SignalR, Razor, and parts of EF Core. |
+
+The .NET Core SDK adds an implicit package reference to `Microsoft.NETCore.App` to all projects. ASP.NET Core overrides the default by setting `MicrosoftNETPlatformLibrary` to "Microsoft.AspNetCore.App". The shared framework files come from runtime installers found on https://aka.ms/dotnet-download, or bundled in Visual Studio, Docker images, and some Azure services. Also if you install the SDK, the runtime (i.e. shared framework)
+is inluded.
+
+**Version roll-forward**
+As mentioned above, `runtimeconfig.json` is a minimum version. The actual version used depends on a rollforward policy documented in great detail by Microsoft. The most common way this applies is:
+
+- If an app minimum version is 2.1.0, the highest 2.1.* version will be loaded.
+
 > NOTE: `Framework-dependent apps` use the target framework version with a ".0" patch version (for the `runtimeOptions.framework.version` value), and `Self-contained apps` use the latest corresponding patch version (from when the SDK shipped).
 
 > NOTE: The `runtimeconfig.json` file will also configure the .NET host to probe for `System.*` (BCL) assemblies in the shared framework folder at runtime. The (runtime) assemblies are then loaded from `/usr/share/dotnet/shared/Microsoft.NETCore.App/5.0.3/` on my Linux machine.
+
+**Layered shared frameworks**
+This feature was added in .NET Core 2.1.
+
+Shared frameworks can depend on other shared frameworks. This was introduced to support ASP.NET Core which converted from a package runtime store to a shared framework.
+
+For example, if you look inside the `$DOTNET_ROOT/shared/Microsoft.AspNetCore.App/5.0.3/` folder, you will see a Microsoft.AspNetCore.All.runtimeconfig.json file.
+
+```bash
+$ cat /usr/share/dotnet/shared/Microsoft.AspNetCore.App/5.0.3/Microsoft.AspNetCore.App.runtimeconfig.json
+{
+  "runtimeOptions": {
+    "tfm": "net5.0",
+    "framework": {
+      "name": "Microsoft.NETCore.App",
+      "version": "5.0.3"
+    },
+    "rollForward": "LatestPatch"
+  }
+}
+```
+
+**Multi-level lookup**
+This feature was added in .NET Core 2.0.
+
+The host will probe several locations to find a suitable shared framework. It starts by looking in the dotnet root, which is the directory containing the dotnet executable. This can also be overridden by setting the `DOTNET_ROOT` environment variable to a folder path. The first location probed is:
+
+```
+$DOTNET_ROOT/shared/$name/$version
+```
+
+If a folder is not there, it will attempt to look in pre-defined global locations using multi-level lookup. This can be turned off by setting the environment variable `DOTNET_MULTILEVEL_LOOKUP=0`. The default global locations are:
+
+| OS | Location |
+| -- | -------- |
+| Windows | C:\Program Files\dotnet (64-bit processes)
+C:\Program Files (x86)\dotnet (32-bit processes) ([source code](https://github.com/dotnet/runtime/blob/ba8ce9e1a00b57aba6ab7384c16f4594be6754e2/src/native/corehost/hostmisc/pal.windows.cpp#L272-L301)) |
+| MacOS | /usr/local/share/dotnet ([source code](https://github.com/dotnet/runtime/blob/ba8ce9e1a00b57aba6ab7384c16f4594be6754e2/src/native/corehost/hostmisc/pal.unix.cpp#L510)) |
+| Unix | /usr/share/dotnet ([source code](https://github.com/dotnet/runtime/blob/ba8ce9e1a00b57aba6ab7384c16f4594be6754e2/src/native/corehost/hostmisc/pal.unix.cpp#L512)) |
+
+The host will probe for directories in:
+
+```
+$GLOBAL_DOTNET_ROOT/shared/$name/$version
+```
+
+**ReadyToRun**
+The assemblies in the shared frameworks are pre-optimized with a tool called `crossgen`. This produces “ReadyToRun” versions of .dll’s which are optimized for specific operating systems and CPU architectures. The primary performance gain is that this reduces the amount of time the JIT spends preparing code on startup.
+
+**Publish trimming**
+When you run `dotnet publish` to create a `framework-dependent app`, the SDK uses the NuGet restore result to determine which assemblies should be in the publish folder. Some will be copied from NuGet packages, and others are not because they are expected to be in the shared frameworks.
+
+**Confusing the target framework moniker with the shared framework**
+It’s easy to think that "net5.0" == "Microsoft.NETCore.App, v5.0.0". This is not true. A target framework moniker (aka TFM) is specified in a project using the `<TargetFramework>` element. `net5.0` is meant to be a human-friendly way to express which version of .NET Core you would like to use.
+
+The pitfall of a TFM is that it is too short. It cannot express things like multiple shared frameworks, patch-specific versioning, version rollforward, output type, and self-contained vs framework-dependent deployment. The SDK will attempt to infer many of these settings from the TFM, but it cannot infer everything.
+
+So, more accurately, "net5.0" implies "Microsoft.NETCore.App, at least v5.0.0".
 
 ## External references to packages
 
@@ -163,6 +308,8 @@ In the framework-dependent deployment model, the `*.runtimeconfig.json` file wil
 ```
 
 **This data is used to locate the shared framework folder**
+
+**The shared framework version represents the minimum version. The .NET Core host will never run on a lower version, but it may try to run on a higher one.**
 
 In general, it locates the shared runtime in the shared folder located beside it by using the relative path `shared/[runtimeOptions.framework.name]/[runtimeOptions.framework.version]`. Once it has applied any version roll-forward logic and come to a final path to the shared framework, it locates the `[runtimeOptions.framework.name].deps.json` file within that folder and loads it first.
 
