@@ -218,8 +218,7 @@ If a folder is not there, it will attempt to look in pre-defined global location
 
 | OS | Location |
 | -- | -------- |
-| Windows | C:\Program Files\dotnet (64-bit processes)
-C:\Program Files (x86)\dotnet (32-bit processes) ([source code](https://github.com/dotnet/runtime/blob/ba8ce9e1a00b57aba6ab7384c16f4594be6754e2/src/native/corehost/hostmisc/pal.windows.cpp#L272-L301)) |
+| Windows | C:\Program Files\dotnet (64-bit processes) <br/> C:\Program Files (x86)\dotnet (32-bit processes) ([source code](https://github.com/dotnet/runtime/blob/ba8ce9e1a00b57aba6ab7384c16f4594be6754e2/src/native/corehost/hostmisc/pal.windows.cpp#L272-L301)) |
 | MacOS | /usr/local/share/dotnet ([source code](https://github.com/dotnet/runtime/blob/ba8ce9e1a00b57aba6ab7384c16f4594be6754e2/src/native/corehost/hostmisc/pal.unix.cpp#L510)) |
 | Unix | /usr/share/dotnet ([source code](https://github.com/dotnet/runtime/blob/ba8ce9e1a00b57aba6ab7384c16f4594be6754e2/src/native/corehost/hostmisc/pal.unix.cpp#L512)) |
 
